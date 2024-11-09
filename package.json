@@ -1,0 +1,21 @@
+{
+  "name": "file_type_detection",
+  "version": "1.0.0",
+  "author": "Stéphane RONCIN",
+  "license": "MIT",
+  "description": "This project provides a Node.js utility for detecting the true file type of a file based on its binary content, rather than relying solely on file extensions.",
+  "engines": {
+    "node": "22.11.0",
+    "npm": "^10.9.0"
+  },  
+  "main": "nodejs-test-file-types.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node nodejs-test-file-types.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}
