@@ -4,8 +4,8 @@ This project provides a Node.js utility for detecting the true file type of a fi
 
 ## Prerequisites
 
-- Node.js v16.0.0 or higher (LTS recommended)
-- npm v6.0.0 or higher (comes bundled with Node.js)
+- Node.js v22.11.0 or higher (LTS recommended)
+- npm v10.9.0 or higher (comes bundled with Node.js)
 
 ## Installation
 
