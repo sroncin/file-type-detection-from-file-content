@@ -70,8 +70,8 @@ npm ci
 The utility outputs a list of files in the specified directory along with their detected true file types. The output format is as follows:
 
 ```ps
-List files from: <specified_directory>
-File: <filename> >> REAL Type: <detected_file_type>
+List files from: [specified_directory]
+File: [filename] >> REAL Type: [detected_file_type]
 ...
 ```
 
