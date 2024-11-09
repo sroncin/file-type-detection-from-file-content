@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <system.webServer>
+        <httpErrors errorMode="DetailedLocalOnly" />
+        <security>
+            <requestFiltering>
+                <fileExtensions>
+                    <add fileExtension=".txt" allowed="false" />
+                </fileExtensions>
+                <verbs>
+                    <remove verb="DELETE" />
+                    <remove verb="PUT" />
+                    <add verb="PUT" allowed="true" />
+                    <add verb="DELETE" allowed="true" />
+                </verbs>
+                <requestLimits maxAllowedContentLength="4294967295" />
+            </requestFiltering>
+        </security>
+        <rewrite>
+            <rules>
+                <clear />
+                <rule name="External link redirect" enabled="true" stopProcessing="true">
+                    <match url="^crm/extlink/([0-9a-z-_;\/\$]+)$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Redirect" url="crm/home?page=logon&amp;urldest={R:1}" appendQueryString="true" logRewrittenUrl="true" />
+                </rule>
+                <rule name="Internal link" enabled="true" stopProcessing="true">
+                    <match url="^crm/view/([a-z]+)/([0-9]+)$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Redirect" url="crm/dialog?page=remote/DialogOperation&amp;action=view;{R:1};{R:2}&amp;close=T" appendQueryString="false" />
+                </rule>
+                <rule name="efficy.dll crm prettify" enabled="true" stopProcessing="true">
+                    <match url="^crm/([0-9a-z-_;\/\$]+)$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="efficy.dll/{R:1}" logRewrittenUrl="true" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="efficy" />
+                        <set name="X_EFFICY_PATH" value="/crm" />
+                    </serverVariables>
+                </rule>
+                <rule name="efficy.dll extranet prettify" enabled="true" stopProcessing="true">
+                    <match url="^public/([0-9a-z-_;\/\$]+)$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="efficy.dll/{R:1}" logRewrittenUrl="true" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="extranet" />
+                        <set name="X_EFFICY_PATH" value="/public" />
+                    </serverVariables>
+                </rule>
+                <rule name="conficy.dll prettify" enabled="true" stopProcessing="true">
+                    <match url="^designer/([0-9a-z-_;\/\$]+)" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="conficy.dll/{R:1}" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="conficy" />
+                        <set name="X_EFFICY_PATH" value="/designer" />
+                    </serverVariables>
+                </rule>
+                <rule name="servicy.dll prettify (file)" enabled="true" stopProcessing="true">
+                    <match url="^file/([0-9a-z]+)" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="servicy.dll/{R:1}" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="servicyfile" />
+                        <set name="X_EFFICY_PATH" value="/file" />
+                    </serverVariables>
+                </rule>
+                <rule name="servicy.dll prettify (srv)" enabled="true" stopProcessing="true">
+                    <match url="^srv/([0-9a-z]+)" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="servicy.dll/{R:1}" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="servicysrv" />
+                        <set name="X_EFFICY_PATH" value="/srv" />
+                    </serverVariables>
+                </rule>
+                <rule name="servicy.dll prettify (token)" enabled="true" stopProcessing="true">
+                    <match url="^token/([0-9a-z]+)" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="servicy.dll/{R:1}" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="servicytoken" />
+                        <set name="X_EFFICY_PATH" value="/token" />
+                    </serverVariables>
+                </rule>
+                <rule name="servicy.dll prettify (pwd)" enabled="true" stopProcessing="true">
+                    <match url="^pwd/([0-9a-z]+)" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Rewrite" url="servicy.dll/{R:1}" />
+                    <serverVariables>
+                        <set name="X_EFFICY_APP" value="servicypwd" />
+                        <set name="X_EFFICY_PATH" value="/pwd" />
+                    </serverVariables>
+                </rule>
+                <rule name="Crm logon redirect" enabled="true" stopProcessing="true">
+                    <match url="^$|^crm[/]?$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Redirect" url="crm/home?page=logon" appendQueryString="true" logRewrittenUrl="true" />
+                </rule>
+                <rule name="Extranet logon redirect" enabled="true" stopProcessing="true">
+                    <match url="^public[/]?$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="false" />
+                    <action type="Redirect" url="public/home?page=logon" appendQueryString="true" logRewrittenUrl="true" />
+                </rule>
+                <rule name="Designer logon redirect" enabled="true" stopProcessing="true">
+                    <match url="^designer[/]?$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="true" />
+                    <action type="Redirect" url="designer/home?page=logon" appendQueryString="true" logRewrittenUrl="true" />
+                </rule>
+                <rule name="Console logon redirect" enabled="true" stopProcessing="true">
+                    <match url="^console[/]?$" />
+                    <conditions logicalGrouping="MatchAll" trackAllCaptures="true" />
+                    <action type="Redirect" url="crm/console" appendQueryString="true" logRewrittenUrl="true" />
+                </rule>
+                <rule name="Old links redirect" stopProcessing="true">
+                    <match url="^efficy.dll/([0-9a-z]+)$" />
+                    <action type="Redirect" url="crm/{R:1}" />
+                </rule>
+            </rules>
+        </rewrite>
+    </system.webServer>
+</configuration>

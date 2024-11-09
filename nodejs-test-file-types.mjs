@@ -1,5 +1,21 @@
 import * as fs from 'fs';
 import path from 'path';
+import { fileTypeFromFile } from 'file-type';
+import languageDetect from 'language-detect';
+import { promisify } from 'util';
+
+// Convert callback style to promise
+const detectLanguage = promisify(languageDetect);
+
+function pad(pad, str, padLeft) {
+    if (typeof str === 'undefined')
+        return pad;
+    if (padLeft) {
+        return (pad + str).slice(-pad.length);
+    } else {
+        return (str + pad).substring(0, pad.length);
+    }
+}
 
 /**
  * detects file type by file header bytes
@@ -8,7 +24,7 @@ import path from 'path';
  * @see @link{https://www.garykessler.net/library/file_sigs.html}
  * @see @link{https://en.wikipedia.org/wiki/List_of_file_signatures}
  */
-function getFileType(filePath) {
+async function getFileType(filePath) {
     if (!filePath || !fs.statSync(filePath).isFile()) {
         return null;
     }
@@ -20,9 +36,53 @@ function getFileType(filePath) {
     const specialHandlers = {
         'D0CF11E0A1B11AE1': () => {
             const content = buffer.toString('hex').toUpperCase();
-            if (content.includes('57006F0072006B0062006F006F006B')) return 'xls';
+
+            // Word (.doc) markers
             if (content.includes('57006F00720064002E0044006F00630075006D0065006E0074')) return 'doc';
+            if (content.includes('626A626AC6C8C6C8')) return 'doc';
+            if (content.includes('6D736F2D6170706C69636174696F6E2F776F7264')) return 'doc';
+            if (content.includes('4D6963726F736F667420576F7264')) return 'doc';
+
+            // Excel (.xls) markers  
+            if (content.includes('57006F0072006B0062006F006F006B')) return 'xls';
+            if (content.includes('45007800630065006C002E00530068006500650074')) return 'xls';
+            if (content.includes('5374616E64617264204A657420444200')) return 'xls';
+            if (content.includes('4D6963726F736F66742045786365')) return 'xls';
+            if (content.includes('42494646')) return 'xls';
+
+            // PowerPoint (.ppt) markers
             if (content.includes('500072006500730065006E007400610074006900')) return 'ppt';
+            if (content.includes('506F776572506F696E7420446F63756D656E74')) return 'ppt';
+            if (content.includes('6D736F2D6170706C69636174696F6E2F706F776572706F696E74')) return 'ppt';
+            if (content.includes('4D6963726F736F667420506F776572506F696E74')) return 'ppt';
+
+            // Microsoft Visio
+            if (content.includes('56006900730069006F')) return 'vsd';
+            if (content.includes('4D6963726F736F6674205669736976')) return 'vsd';
+
+            // Microsoft Publisher
+            if (content.includes('5075626C6973686572')) return 'pub';
+            if (content.includes('4D6963726F736F667420507562')) return 'pub';
+
+            // Microsoft Project
+            if (content.includes('50726F6A656374')) return 'mpp';
+            if (content.includes('4D6963726F736F66742050726F6A656374')) return 'mpp';
+
+            // Microsoft Outlook
+            if (content.includes('4F007500740066006C00740072')) return 'msg';
+            if (content.includes('4D534F46542D4F55544C4F4F4B2D4D4553534147452F')) return 'msg';
+
+            // Corel WordPerfect
+            if (content.includes('576F726450657266656374')) return 'wpd';
+            if (content.includes('434F52454C2D574F52442D504552464543542F')) return 'wpd';
+
+            // Microsoft Works
+            if (content.includes('4D6963726F736F667420576F726B73')) return 'wps';
+
+            // Microsoft OneNote
+            if (content.includes('4D6963726F736F6674204F6E654E6F7465')) return 'one';
+
+            console.log("OLE: " + content);
             return 'ole';
         },
         '504B': () => {
@@ -70,7 +130,7 @@ function getFileType(filePath) {
         '3C21': () => {
             const content = buffer.toString('hex').toUpperCase();
             if (content.startsWith('3C21444F43')) return 'html';  // <!DOC
-            if (content.includes('444F43545950452068746D6C')) return 'html';
+            if (content.includes('444F43545950452068746D6C')) return 'html'; 
             if (content.includes('3C3F786D6C')) return 'xml';
             return 'html';
         }
@@ -88,8 +148,8 @@ function getFileType(filePath) {
         // Images
         '89504E470D0A1A0A': 'png',
         '47494638': 'gif',
-        '49492A00': 'tiff', //tif/tiff = Intel byte ordering (little-endian)
-        '4D4D002A': 'tiff', //tif/tiff = Motorola byte ordering (big-endian)
+        '49492A00': 'tif', //tif/tiff = Intel byte ordering (little-endian)
+        '4D4D002A': 'tif', //tif/tiff = Motorola byte ordering (big-endian)
         '424D': 'bmp',
         '414F4C494458': 'idx',
 
@@ -244,7 +304,7 @@ function getFileType(filePath) {
 
     // Check binary signatures
     for (const [signature, fileType] of Object.entries(signatures)) {
-        if (hexSignature.startsWith(signature)) {
+        if (hexSignature.indexOf(signature) >= 0) {
             return fileType;
         }
     }
@@ -252,7 +312,7 @@ function getFileType(filePath) {
     // Text file detection
     const sampleSize = Math.min(buffer.length, 1024);
     let printableChars = 0;
-    
+
     for (let i = 0; i < sampleSize; i++) {
         const byte = buffer[i];
         if ((byte >= 32 && byte <= 126) || byte === 9 || byte === 10 || byte === 13) {
@@ -260,30 +320,100 @@ function getFileType(filePath) {
         }
     }
 
-    if (printableChars / sampleSize > 0.9) {
-        return 'txt';
+    //FIXME: this not working properly, it is too complex to try to detect text files extensions
+    if (false && printableChars / sampleSize > 0.9) {
+
+        let language = "txt";
+        try {
+            language = await detectLanguage(filePath);
+
+            // Add validation for shell detection
+            if (language.toLowerCase() === 'shell') {
+                const content = fs.readFileSync(filePath, 'utf8');
+                // Check for common shell script indicators
+                const shellIndicators = ['#!/', '$', 'export ', 'echo ', 'sudo '];
+                const hasShellSyntax = shellIndicators.some(indicator => content.includes(indicator));
+
+                if (!hasShellSyntax) {
+                    language = 'txt';
+                }
+            }
+
+            // Add validation for JavaScript detection
+            if (language.toLowerCase() === 'objective-c') {
+                const content = fs.readFileSync(filePath, 'utf8');
+                // Check for common JavaScript indicators
+                const jsIndicators = [
+                    'function',
+                    'var ',
+                    'const ',
+                    'let ',
+                    'typeof',
+                    'config.',
+                    'CKEDITOR',
+                    'Class ',
+                ];
+                const scssIndicators = [
+                    '@import',
+                    '.scss',
+                    '$',
+                    '@mixin',
+                    '@include',
+                    '@extend'
+                ];
+                const hasJsSyntax = jsIndicators.some(indicator => content.includes(indicator));
+                const hasScssSyntax = scssIndicators.some(indicator => content.includes(indicator));
+
+                if (hasJsSyntax && !hasScssSyntax) {
+                    language = 'js';
+                }
+                if (hasScssSyntax) {
+                    language = 'scss';
+                }
+            }
+
+            if (language.toLowerCase() === 'ruby') {
+                language = 'rb';
+            }
+        } catch (error) {
+            //console.error('Error detecting language:', error);
+        }
+
+        return language.toLocaleLowerCase();
     }
 
     return 'unknown';
 }
 
-
-
 // ***** MAIN *****
+
 let localFilePath = "./assets/";
 const userPath = process.argv[2];
-if (userPath &&  fs.existsSync(userPath)) {
+if (userPath && fs.existsSync(userPath)) {
     localFilePath = userPath;
 }
 console.log(`List files from: ${localFilePath}`);
 
 const files = fs.readdirSync(localFilePath);
-files.forEach(file => {
+
+//My file type detection
+await Promise.all(files.map(async (file) => {
     const fullPath = path.join(localFilePath, file);
     if (fs.statSync(fullPath).isFile()) {
-        const fileType = getFileType(fullPath);
-        console.log(`File: ${file} >> REAL Type: ${fileType}`);
+        const awaitedType = file.split(".")[0].split("_").pop();
+
+        const fileType = await getFileType(fullPath);
+        console.log(`File: ${pad("                                  ", file, true)} | awaited extension: ${pad("       ", awaitedType, true)} >> MY REAL Type: ${fileType} ${(fileType && awaitedType !== fileType ? "  <<<<  KO " : "")}`);
     }
-});
+}));
 
+//file-type lib detection
+await Promise.all(files.map(async (file) => {
+    const fullPath = path.join(localFilePath, file);
+    if (fs.statSync(fullPath).isFile()) {
+        const awaitedType = file.split(".")[0].split("_").pop();
 
+        const fileInfo = await fileTypeFromFile(fullPath);
+        console.log(`File: ${pad("                                  ", file, true)} | awaited extension: ${pad("       ", awaitedType, true)} >> FILE-TYPE LIB REAL Type: ${(!fileInfo ? "undefined" : fileInfo.ext)} ${(!fileInfo || awaitedType !== fileInfo.ext ? "  <<<<  KO " : "")}`);
+    }
+}));

@@ -1,0 +1,37 @@
+﻿# Preprocessor Paths
+
+relative_assets = true
+http_path = "/"
+css_dir = "..\\css"
+sass_dir = "."
+cache_path = "c:\\windows\\temp\\.sass-cache"
+add_import_path "..\\..\\"  # points to wwwroot
+
+# Preprocessor Options
+# Output style can be :expanded or :nested or :compact or :compressed
+output_style = :compressed 
+line_comments = false 
+sass_options = {:sourcemap => false} 
+
+
+# Check if file exists
+module Sass::Script::Functions
+		 def file_exists(root_folder, file_path)
+					path = root_folder.value.delete_suffix('/') + '/' + file_path.value.delete_prefix('/')
+					Sass::Script::Bool.new(File.exists?(path))
+		 end
+end
+
+# Get file directory
+module Sass::Script::Functions
+		 def file_dirname(file_path)
+					Sass::Script::String.new(File.dirname(file_path.value).delete_suffix('/.'))
+		 end
+end
+
+# String contains
+module Sass::Script::Functions
+		 def str_contains(source, pattern)
+					Sass::Script::Bool.new(source.value.downcase().include?(pattern.value))
+		 end
+end

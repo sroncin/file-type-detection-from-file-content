@@ -1,0 +1,74 @@
+CKEDITOR.editorConfig = function (config) {
+
+	config.autoUpdateElement = true;
+	config.dataIndentationChars = '\t';
+	config.defaultLanguage = 'en';
+	config.disableNativeSpellChecker = false;
+	config.docType = '<!DOCTYPE html>';
+	config.fontSize_defaultLabel = '9pt';
+	config.fontSize_sizes = '9/9pt;10/10pt;12/12pt;14/14pt;16/16pt;20/20pt;24/24pt;28/28pt;36/36pt';
+	config.font_defaultLabel = 'Verdana';
+	config.font_names = 'Calibri;Courier New;Georgia;Helvetica;Lucida Sans Unicode;Verdana';
+	config.fullPage = true;
+	config.magicline_color = '#60739F';
+	config.resize_enabled = false;
+	config.skin = 'efficy';
+	config.startupFocus = false;
+	config.toolbarCanCollapse = false;
+	config.extraPlugins = 'codemirror,efficy,pastebase64';
+	config.codemirror = {
+		theme:                  'default',
+		lineNumbers:            true,
+		lineWrapping:           true,
+		matchBrackets:          true,
+		autoCloseTags:          true,
+		autoCloseBrackets:      true,
+		enableSearchTools:      true,
+		enableCodeFolding:      true,
+		enableCodeFormatting:   true,
+		autoFormatOnStart:      true,
+		autoFormatOnModeChange: true,
+		autoFormatOnUncomment:  true,
+		highlightActiveLine:    true,
+		mode:                   'htmlmixed',
+		showSearchButton:       false,
+		showTrailingSpace:      true,
+		highlightMatches:       true,
+		showFormatButton:       false,
+		showCommentButton:      false,
+		showUncommentButton:    false,
+		showAutoCompleteButton: false
+	};
+
+	var entity = (typeof Model === 'function' && Model('entity')) || location.href.split('entity=')[1].split('&')[0];
+	if (entity && entity.toLowerCase() === 'tmpl') {
+		config.entities = false;
+		config.htmlEncodeOutput = false;
+		config.forceSimpleAmpersand = true;
+	}
+
+	config.toolbar_Basic = [
+		['Bold', 'Italic', 'Underline', 'Strike'],
+		['Font', 'FontSize', 'TextColor'],
+		['CopyFormatting', 'RemoveFormat'],
+		['PasteFromWord'],
+		['Maximize'],
+		['Source'],
+		// second line on 'medium'
+		['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+		['BulletedList', 'NumberedList'],
+		['Indent', 'Outdent'],
+		['Link', 'Unlink', 'Image', 'HorizontalRule', 'Table'],
+		['Timestamp'],
+		['PlainText']
+	];
+
+	config.toolbar_Minimal = [
+		['Bold', 'Italic', 'Underline', 'Strike'],
+		['FontSize', 'TextColor'],
+		// second line on 'medium'
+		['BulletedList', 'NumberedList'],
+		['Link', 'Unlink', 'Image', 'HorizontalRule', 'Table']
+	];
+
+};

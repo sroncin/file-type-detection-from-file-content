@@ -7,7 +7,7 @@
   "engines": {
     "node": "22.11.0",
     "npm": "^10.9.0"
-  },  
+  },
   "main": "nodejs-test-file-types.mjs",
   "type": "module",
   "scripts": {
@@ -16,6 +16,8 @@
   },
   "keywords": [],
   "dependencies": {
-    "fs": "^0.0.1-security"
+    "file-type": "^19.6.0",
+    "fs": "^0.0.1-security",
+    "language-detect": "^1.1.0"
   }
 }

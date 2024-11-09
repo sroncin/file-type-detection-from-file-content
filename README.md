@@ -65,6 +65,14 @@ To remove installed dependencies and lockfiles (useful for troubleshooting or en
 npm ci
 ```
 
+or
+
+```ps
+Remove-Item -Recurse -Force node_modules
+Remove-Item package-lock.json
+npm install
+```
+
 ## Output
 
 The utility outputs a list of files in the specified directory along with their detected true file types. The output format is as follows:
